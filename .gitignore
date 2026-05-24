@@ -1,0 +1,54 @@
+# Virtual Environment
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# IntelliJ / PyCharm
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment variables
+.env
+
+# Data folders
+data/
+
+# Spark temporary files
+spark-warehouse/
+metastore_db/
+derby.log
+
+# PySpark local temp
+tmp/
+temp/
+
+# Kafka logs
+kafka-logs/
+
+# Delta Lake transaction logs
+_delta_log/
+
+# Build artifacts
+dist/
+build/
+
+# Mac/Linux hidden files
+*.swp
+*.swo
