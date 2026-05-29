@@ -1,0 +1,15 @@
+services:
+
+  spark:
+    image: apache/spark:latest
+    container_name: spark
+
+    ports:
+      - "4040:4040"
+
+    volumes:
+      - ../spark:/opt/spark-apps
+      - ../data:/data
+
+    stdin_open: true
+    tty: true
