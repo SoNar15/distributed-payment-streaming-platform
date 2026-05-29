@@ -6,6 +6,9 @@ import os
 from datetime import datetime
 import signal
 import sys
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from streaming.payment_producer import send_payment_event
+
 
 fake = Faker()
 
@@ -71,6 +74,7 @@ if __name__ == "__main__":
         payment_event = generate_payment_event()
         print(json.dumps(payment_event, indent=2))
         save_event_to_file(payment_event)
+        send_payment_event(payment_event)
         time.sleep(1)
 
 
