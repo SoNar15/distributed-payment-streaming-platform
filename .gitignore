@@ -1,7 +1,7 @@
 # Virtual Environment
 venv/
 env/
-
+wsl_venv/
 # Python cache
 __pycache__/
 *.pyc
@@ -26,6 +26,9 @@ Thumbs.db
 
 # Environment variables
 .env
+
+*.ndjson
+*.json
 
 # Data folders
 data/

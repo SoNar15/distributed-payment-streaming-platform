@@ -4,7 +4,6 @@ spark = (
     SparkSession.builder
     .appName("PaymentStreamProcessor")
     .master("local[1]")
-    .config("spark.driver.memory", "1g")
     .config(
         "spark.jars.packages",
         "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1"
@@ -14,21 +13,40 @@ spark = (
 
 spark.sparkContext.setLogLevel("ERROR")
 
+print("Creating Kafka stream...")
+
 df = (
     spark.readStream
     .format("kafka")
-    .option("kafka.bootstrap.servers", "localhost:9092")
+    .option("kafka.bootstrap.servers", "172.27.32.1:9092")
     .option("subscribe", "payments")
-    .option("startingOffsets", "latest")
+    .option("startingOffsets", "earliest")
     .load()
 )
 
+print("Kafka stream created")
+
+json_df = df.selectExpr(
+    "CAST(value AS STRING) as message",
+    "offset",
+    "partition"
+)
+
+
+print("Starting stream query...")
+
+
 query = (
-    df.selectExpr("CAST(value AS STRING)")
-    .writeStream
-    .format("console")
+    json_df.writeStream
     .outputMode("append")
+    .format("console")
+    .option("truncate", "false")
     .start()
 )
+
+
+print("Stream query started")
+
+print("Query active:", query.isActive)
 
 query.awaitTermination()
