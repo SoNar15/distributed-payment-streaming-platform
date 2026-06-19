@@ -39,8 +39,15 @@ print("Starting stream query...")
 query = (
     json_df.writeStream
     .outputMode("append")
-    .format("console")
-    .option("truncate", "false")
+    .format("parquet")
+    .option(
+        "path",
+        "data/bronze/payments"
+    )
+    .option(
+        "checkpointLocation",
+        "data/checkpoints/payments"
+    )
     .start()
 )
 

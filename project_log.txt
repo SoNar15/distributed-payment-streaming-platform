@@ -1,0 +1,1305 @@
+
+Before moving forward ,add the info in the log we had made earlier , about what we did , waht went wrong , what we changed , what is current plan and what we did 
+Decision Log ->
+
+# Distributed Payment Streaming Platform
+
+## Project Progress Report and Engineering Decision Log
+
+### Author
+
+Soham Narkhedkar
+
+### Project Goal
+
+Build a production-inspired real-time payment processing platform demonstrating:
+
+* Python
+* Kafka
+* Spark Structured Streaming
+* Bronze/Silver Data Lake Architecture
+* PostgreSQL
+* Airflow
+* Docker
+* Cloud Readiness
+
+The project is intended to be portfolio-quality for Data Engineering interviews.
+
+---
+
+# Initial Architecture Vision
+
+The original target architecture was:
+
+Payment Generator
+↓
+Kafka
+↓
+Spark Structured Streaming
+↓
+Bronze Layer
+↓
+Silver Layer
+↓
+PostgreSQL
+↓
+Airflow
+
+---
+
+# Phase 1: Project Setup
+
+## Objective
+
+Create a structured repository resembling a real-world Data Engineering project.
+
+## Completed
+
+Created project structure:
+
+distributed-payment-streaming-platform/
+
+generator/
+streaming/
+spark/
+docker/
+data/
+docs/
+
+README.md
+requirements.txt
+
+Git repository initialized.
+
+GitHub repository connected and first commits pushed.
+
+---
+
+# Phase 2: Payment Event Generator
+
+## Objective
+
+Generate realistic banking/payment events continuously.
+
+## Technology
+
+Python
+Faker Library
+
+## Features Implemented
+
+Generated fields:
+
+* transaction_id
+* event_timestamp
+* sender_account
+* receiver_account
+* amount
+* currency
+* merchant_id
+* payment_method
+* transaction_status
+* location
+* device_id
+* bank_name
+* merchant_category
+* processing_time_ms
+
+Events generated every second.
+
+Example:
+
+{
+"transaction_id": "TXN123456",
+"amount": 5000,
+"bank_name": "HDFC"
+}
+
+---
+
+## Problems Encountered
+
+### Logging Configuration Error
+
+Initial implementation attempted:
+
+logger.info(...)
+
+without properly configuring logger.
+
+Result:
+
+Runtime errors.
+
+Resolution:
+
+Replaced logger with print() and later simplified architecture.
+
+---
+
+### File Path Problems
+
+Generated files could not be located correctly.
+
+Cause:
+
+Relative path confusion between:
+
+generator/
+data/
+
+Resolution:
+
+Introduced:
+
+OUTPUT_DIR
+OUTPUT_FILE
+os.makedirs(...)
+
+and standardized output locations.
+
+---
+
+### JSON Format Issue
+
+Initial file:
+
+raw_payments.json
+
+contained:
+
+JSON
+JSON
+JSON
+JSON
+
+one object per line.
+
+VS Code reported:
+
+"End of file expected"
+
+Cause:
+
+File was not valid JSON array.
+
+Resolution:
+
+Recognized that format was actually:
+
+NDJSON
+(Newline Delimited JSON)
+
+Renamed:
+
+raw_payments.ndjson
+
+This is industry standard for streaming ingestion.
+
+---
+
+# Phase 3: Kafka Setup
+
+## Objective
+
+Move from file-based events to event streaming.
+
+---
+
+## Kafka Installation
+
+Installed:
+
+Kafka 3.8.1
+
+Java 17
+
+Using:
+
+KRaft Mode
+
+instead of ZooKeeper.
+
+---
+
+## Problems Encountered
+
+### Java Not Found
+
+Issue:
+
+java --version
+
+failed.
+
+Cause:
+
+Java installed but PATH not configured for Git Bash.
+
+Resolution:
+
+Added:
+
+C:\Program Files\Eclipse Adoptium\jdk-17...
+
+to PATH.
+
+Verification:
+
+java --version
+javac --version
+
+successful.
+
+---
+
+### Incorrect Kafka Download
+
+Initially downloaded:
+
+kafka-3.8.1-src.tgz
+
+which is source code.
+
+Resolution:
+
+Downloaded:
+
+kafka_2.13-3.8.1.tgz
+
+binary distribution.
+
+---
+
+### Extraction Confusion
+
+Windows did not show:
+
+Extract Here
+
+option.
+
+Resolution:
+
+Installed 7-Zip and extracted manually.
+
+---
+
+# Kafka Cluster Setup
+
+Successfully:
+
+Generated Cluster ID
+
+Formatted KRaft Storage
+
+Started Kafka Broker
+
+Created Topic:
+
+payments
+
+Verified:
+
+kafka-topics --list
+
+Output:
+
+payments
+
+---
+
+# Kafka Producer/Consumer
+
+## Implemented
+
+Producer:
+
+payment_producer.py
+
+Consumer:
+
+kafka-console-consumer
+
+---
+
+## Verification
+
+Messages produced:
+
+hello kafka
+
+payment 123
+
+Successfully consumed.
+
+Later:
+
+Payment generator integrated with producer.
+
+Continuous transaction flow verified.
+
+---
+
+# Phase 4: Python Environment Management
+
+## Objective
+
+Use isolated environment.
+
+Created:
+
+venv/
+
+---
+
+## Problems Encountered
+
+### Renamed Project Folder
+
+Original:
+
+Data Engineering Project
+
+Renamed:
+
+DE
+
+Result:
+
+virtual environment became inconsistent.
+
+---
+
+### Wrong Python Interpreter
+
+Observed:
+
+which python
+
+returned global Python.
+
+Not venv Python.
+
+Symptoms:
+
+Packages appeared installed but imports failed.
+
+Example:
+
+ModuleNotFoundError: pyspark
+
+---
+
+### Root Cause
+
+Git Bash activation script did not correctly override PATH after project relocation.
+
+---
+
+### Resolution
+
+Reinstalled required packages.
+
+Verified:
+
+python -c "import pyspark"
+
+working.
+
+Confirmed:
+
+PySpark 3.5.1 installed.
+
+---
+
+# Phase 5: Spark Setup
+
+## Objective
+
+Prepare Spark for streaming.
+
+---
+
+## Local Spark Validation
+
+Created:
+
+SparkSession
+
+Created DataFrame
+
+Executed:
+
+df.show()
+
+Successfully.
+
+Output:
+
+TXN001
+TXN002
+
+Spark functioning.
+
+---
+
+## Issues Encountered
+
+Windows Spark warnings:
+
+winutils.exe missing
+
+Native Hadoop library warnings
+
+These are common Windows Spark issues.
+
+Application still executed successfully.
+
+---
+
+# Phase 6: Docker Exploration
+
+## Objective
+
+Move toward production-style deployment.
+
+---
+
+## Docker Installation
+
+Installed:
+
+Docker Desktop
+
+WSL2 Backend
+
+AMD64 Version
+
+---
+
+## Resource Planning
+
+System:
+
+Intel i3-6006U
+12 GB RAM
+
+Configured:
+
+4 GB Memory
+2 CPU
+1 GB Swap
+
+through:
+
+.wslconfig
+
+---
+
+## Docker Validation
+
+Executed:
+
+docker run hello-world
+
+Success.
+
+Verified:
+
+Docker Engine
+Docker Hub Connectivity
+Container Runtime
+
+working.
+
+---
+
+# Docker Strategy Attempt
+
+Attempted architecture:
+
+Kafka
+↓
+Spark Container
+
+using:
+
+bitnami/spark
+
+---
+
+## Problems Encountered
+
+### Image Tag Failure
+
+Tried:
+
+bitnami/spark:3.5
+
+Result:
+
+Image not found.
+
+---
+
+### Latest Tag Failure
+
+Tried:
+
+bitnami/spark:latest
+
+Result:
+
+Image not found.
+
+---
+
+### Apache Spark Image Attempt
+
+Pulled:
+
+apache/spark
+
+successfully.
+
+Container started but exited immediately.
+
+---
+
+### Spark Runtime Validation Failure
+
+Executed:
+
+docker run apache/spark spark-submit --version
+
+Result:
+
+spark-submit not found.
+
+---
+
+## Engineering Conclusion
+
+Docker itself is healthy.
+
+Issue is image/runtime selection.
+
+This became infrastructure work rather than Data Engineering work.
+
+---
+
+# Strategic Reassessment
+
+## Original Strategy
+
+Build entire stack in Docker immediately.
+
+Kafka
+↓
+Spark
+↓
+Everything
+
+---
+
+## Problems
+
+Too much time spent on:
+
+* image compatibility
+* container startup
+* runtime debugging
+
+without processing any business data.
+
+---
+
+## Revised Strategy
+
+Prioritize Data Engineering outcomes.
+
+New sequence:
+
+Kafka
+↓
+Spark Structured Streaming
+↓
+Bronze
+↓
+Silver
+↓
+PostgreSQL
+↓
+Airflow
+
+Docker remains available for later phases.
+
+---
+
+# Current Working Components
+
+## Fully Working
+
+Python Event Generator
+
+Kafka Broker
+
+Kafka Topic
+
+Kafka Producer
+
+Kafka Consumer
+
+Git Repository
+
+GitHub Repository
+
+Java 17
+
+PySpark 3.5.1
+
+Docker Desktop
+
+WSL2
+
+---
+
+# Partially Working
+
+Docker Spark Runtime
+
+Reason:
+
+Image selection unresolved.
+
+Docker infrastructure itself works.
+
+---
+
+# Not Yet Implemented
+
+Spark Structured Streaming
+
+Bronze Layer
+
+Silver Layer
+
+PostgreSQL Integration
+
+Airflow DAGs
+
+Cloud Deployment
+
+Monitoring
+
+Data Quality Framework
+
+---
+
+# Current Repository State
+
+docker/
+
+generator/
+payment_generator.py
+
+streaming/
+payment_producer.py
+
+spark/
+payment_stream_processor.py
+
+README.md
+requirements.txt
+.gitignore
+
+---
+
+# Current Project Maturity
+
+Infrastructure: 80%
+
+Streaming Processing: 10%
+
+Lakehouse Architecture: 0%
+
+Orchestration: 0%
+
+Cloud: 0%
+
+Overall Data Engineering Project Completion: ~30%
+
+---
+
+# Next Milestone
+
+Kafka
+↓
+Spark Structured Streaming
+↓
+Console Output
+
+After successful validation:
+
+Kafka
+↓
+Spark
+↓
+Bronze Parquet Storage
+
+This will mark the transition from environment setup to actual Data Engineering implementation.
+
+---
+
+# Lessons Learned
+
+1. Infrastructure setup always takes longer than expected.
+2. Windows introduces additional complexity for Spark.
+3. Kafka KRaft setup is simpler than ZooKeeper.
+4. NDJSON is preferable for streaming data generation.
+5. Docker is valuable but should not block business objectives.
+6. Data Engineering value comes from pipelines, not tooling alone.
+7. Validate every component independently before integration.
+
+
+
+
+
+
+
+
+
+---
+
+# Phase 7: Spark Structured Streaming Integration
+
+## Objective
+
+Build a real-time streaming pipeline that consumes payment events from Kafka and processes them using Spark Structured Streaming.
+
+Target Architecture:
+
+Payment Generator
+↓
+Kafka
+↓
+Spark Structured Streaming
+↓
+Console Output
+
+---
+
+## Initial Strategy
+
+The original plan was to execute Spark directly on Windows using the existing Python virtual environment.
+
+Implemented:
+
+```text
+spark/payment_stream_processor.py
+```
+
+Core responsibilities:
+
+* Create SparkSession
+* Connect Spark to Kafka
+* Subscribe to topic `payments`
+* Consume streaming events
+* Print events to console
+
+---
+
+## Problems Encountered
+
+### Kafka Broker Availability Issue
+
+Error:
+
+```text
+kafka.errors.NoBrokersAvailable
+```
+
+Cause:
+
+Payment generator was started while Kafka broker was not running.
+
+Impact:
+
+Producer could not establish connection to Kafka.
+
+Resolution:
+
+Verified Kafka startup before launching producers.
+
+Validation:
+
+```text
+Kafka Broker Running
+Topic Available
+Producer Connected
+```
+
+---
+
+### Kafka Broker Recovery Issues
+
+Symptoms:
+
+* Kafka failed to restart cleanly
+* Topic metadata inconsistencies
+* Unexpected broker failures
+
+Cause:
+
+Multiple forced broker shutdowns during development.
+
+Impact:
+
+Spark could not reliably connect to Kafka.
+
+Resolution:
+
+Deleted KRaft metadata directory.
+
+Generated a new Cluster ID:
+
+```cmd
+kafka-storage.bat random-uuid
+```
+
+Reformatted storage:
+
+```cmd
+kafka-storage.bat format
+```
+
+Restarted broker with fresh metadata.
+
+---
+
+### Python Environment Confusion
+
+Symptoms:
+
+```text
+ModuleNotFoundError
+```
+
+and inconsistent package behavior.
+
+Cause:
+
+Git Bash was using global Python instead of project virtual environment.
+
+Verification:
+
+```bash
+which python
+python -c "import sys; print(sys.executable)"
+```
+
+Result:
+
+Global Python was being used.
+
+Resolution:
+
+Validated interpreter path and reinstalled required dependencies.
+
+---
+
+### PySpark Installation Mismatch
+
+Observed:
+
+PySpark installed but Spark jobs failed.
+
+Cause:
+
+Packages existed in global Python but not inside project environment.
+
+Resolution:
+
+Verified installation directly:
+
+```bash
+venv/Scripts/python.exe -c "import pyspark"
+```
+
+Confirmed:
+
+```text
+PySpark 3.5.1
+```
+
+installed successfully.
+
+---
+
+### Spark on Windows Challenges
+
+Observed Issues:
+
+* winutils.exe warnings
+* Native Hadoop warnings
+* Environment variable complexity
+* PATH inconsistencies
+
+Engineering Assessment:
+
+Spark functionality worked, but Windows introduced unnecessary operational complexity.
+
+---
+
+# Strategic Reassessment
+
+## Decision
+
+Move Spark execution from Windows to WSL Ubuntu.
+
+Reasoning:
+
+Real-world Data Engineering workloads typically execute on Linux environments.
+
+Expected Benefits:
+
+* Cleaner Java integration
+* Better package management
+* Reduced Spark configuration complexity
+* Environment closer to production systems
+
+---
+
+# WSL Setup
+
+Installed:
+
+* Ubuntu 24.04
+* OpenJDK 17
+* Python 3.12
+
+Created:
+
+```text
+wsl_venv/
+```
+
+Installed:
+
+```text
+PySpark 3.5.1
+Kafka-Python
+Faker
+Py4J
+```
+
+Validation:
+
+```bash
+python -c "import pyspark; print(pyspark.__version__)"
+```
+
+Output:
+
+```text
+3.5.1
+```
+
+---
+
+# Spark-Kafka Integration
+
+## Objective
+
+Consume Kafka events directly from Spark Structured Streaming.
+
+Implemented:
+
+```python
+.config(
+    "spark.jars.packages",
+    "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1"
+)
+```
+
+Reason:
+
+Spark does not include Kafka support by default.
+
+Without this package:
+
+```text
+Spark cannot read Kafka topics.
+```
+
+---
+
+# Initial Streaming Query
+
+Implemented:
+
+```python
+spark.readStream
+    .format("kafka")
+```
+
+Configuration:
+
+```python
+.option("subscribe", "payments")
+.option("startingOffsets", "latest")
+```
+
+---
+
+## Problem Encountered
+
+Streaming job started but produced no output.
+
+Observed:
+
+```text
+Creating Kafka stream...
+Kafka stream created
+```
+
+but no records appeared.
+
+---
+
+### Investigation
+
+Added debugging statements:
+
+```python
+print("Creating Kafka stream...")
+print("Kafka stream created")
+print("Starting stream query...")
+print("Stream query started")
+```
+
+Results:
+
+Spark session was healthy.
+
+Kafka connection appeared healthy.
+
+Query was active.
+
+---
+
+### Kafka Metadata Timeout
+
+Error:
+
+```text
+TimeoutException:
+Timed out waiting for a node assignment
+```
+
+Cause:
+
+Kafka metadata inconsistency after repeated broker restarts and storage resets.
+
+Resolution:
+
+Performed clean KRaft reinitialization and broker restart.
+
+---
+
+### Streaming Offset Issue
+
+Original configuration:
+
+```python
+.option("startingOffsets", "latest")
+```
+
+Problem:
+
+Spark only reads events arriving after query startup.
+
+Existing messages were skipped.
+
+Resolution:
+
+Changed to:
+
+```python
+.option("startingOffsets", "earliest")
+```
+
+Result:
+
+Spark processed existing Kafka messages.
+
+---
+
+# Successful End-to-End Validation
+
+Verified complete data flow:
+
+Payment Generator
+↓
+Kafka Producer
+↓
+Kafka Topic (payments)
+↓
+Spark Structured Streaming
+↓
+Console Output
+
+Observed Output:
+
+```text
+Batch: 0
+Batch: 1
+Batch: 2
+...
+```
+
+Streaming payment events successfully processed in real time.
+
+---
+
+# Engineering Decisions Made
+
+## Docker Deprioritized
+
+Original Plan:
+
+Kafka
+↓
+Dockerized Spark
+
+Problem:
+
+Excessive time spent debugging container runtime behavior.
+
+Decision:
+
+Focus on business data movement first.
+
+Result:
+
+Streaming pipeline completed before containerization.
+
+Docker remains part of later project phases.
+
+---
+
+## WSL Adopted as Primary Spark Environment
+
+Decision:
+
+Run Spark inside WSL Ubuntu.
+
+Reason:
+
+More stable and production-like than local Windows execution.
+
+Result:
+
+WSL became the primary Spark execution environment.
+
+---
+
+# Current Working Architecture
+
+Windows Environment
+
+Payment Generator
+↓
+Kafka Broker
+↓
+Kafka Topic
+
+WSL Environment
+
+Spark Structured Streaming
+↓
+Console Output
+
+---
+
+# Current Working Components
+
+## Fully Working
+
+* Python Event Generator
+* Kafka Broker
+* Kafka Topic
+* Kafka Producer
+* Kafka Consumer
+* Java 17
+* PySpark 3.5.1
+* WSL Ubuntu Environment
+* Spark Structured Streaming
+* Kafka-Spark Integration
+* End-to-End Streaming Pipeline
+* Docker Desktop
+* Git Repository
+* GitHub Repository
+
+---
+
+# Partially Working
+
+Docker Spark Runtime
+
+Reason:
+
+Container image selection still unresolved.
+
+Docker infrastructure itself works correctly.
+
+---
+
+# Not Yet Implemented
+
+* Bronze Layer
+* Silver Layer
+* PostgreSQL Integration
+* Airflow DAGs
+* Cloud Deployment
+* Monitoring
+* Data Quality Framework
+
+---
+
+# Updated Project Maturity
+
+Infrastructure: 90%
+
+Streaming Processing: 100%
+
+Lakehouse Architecture: 0%
+
+Orchestration: 0%
+
+Cloud: 0%
+
+Overall Data Engineering Project Completion: ~40%
+
+---
+
+# Next Milestone
+
+Kafka
+↓
+Spark Structured Streaming
+↓
+Bronze Layer (Parquet Storage)
+
+This will be the first persistent storage layer of the lakehouse architecture and the first step toward a production-style data platform.
+
+---
+
+# Additional Lessons Learned
+
+8. Spark Structured Streaming debugging requires validating each layer independently.
+9. WSL provides a significantly smoother Spark development experience than Windows.
+10. Kafka metadata and storage consistency are critical for stable streaming applications.
+11. Environment validation is often more important than writing additional code.
+12. Distributed systems fail most often due to integration and configuration issues rather than application logic.
