@@ -1,60 +1,57 @@
 # Distributed Real-Time Payment Streaming Platform
 
-A distributed event-driven payment processing platform built using Apache Kafka, PySpark Structured Streaming, and Lakehouse architecture concepts.
+Real-time payment streaming platform built using Apache Kafka, PySpark Structured Streaming, PostgreSQL, and Lakehouse architecture principles.
+
+> Simulates a production-grade fintech payment processing pipeline with Bronze, Silver, and PostgreSQL serving layers.
 
 ---
 
 ## Architecture
 
-```text
-Payment Generator
-        ↓
-Kafka Producer
-        ↓
-Kafka Topic (payments)
-        ↓
-Spark Structured Streaming
-        ↓
-Bronze Layer (Next Phase)
-        ↓
-Silver Layer (Planned)
-        ↓
-Analytics Layer (Planned)
-```
+```mermaid
+flowchart TD
 
+A[Payment Generator]
+-->B[Kafka Producer]
+-->C[Kafka Topic]
+
+C-->D[Spark Structured Streaming]
+
+D-->E[Bronze Layer]
+
+E-->F[Silver Layer]
+
+F-->G[PostgreSQL]
+
+G-->H[Analytics]
+```
 ---
+
+## Features
+
+- Real-time payment event generation
+- Apache Kafka event streaming
+- Spark Structured Streaming pipeline
+- Bronze and Silver Lakehouse layers
+- PostgreSQL serving layer
+- Schema validation
+- Data cleansing
+- Parquet storage
 
 ## Tech Stack
 
-### Data Generation
+## Tech Stack
 
-* Python
-* Faker
-
-### Streaming
-
-* Apache Kafka 3.8.1 (KRaft Mode)
-
-### Processing
-
-* PySpark 3.5.1
-* Spark Structured Streaming
-
-### Development Environment
-
-* Windows 11
-* WSL2 Ubuntu 24.04
-* Git
-* GitHub
-
-### Future Enhancements
-
-* Delta Lake
-* Apache Airflow
-* Docker
-* AWS S3
-* AWS Glue
-* Athena
+| Layer | Technology |
+|--------|------------|
+| Language | Python |
+| Streaming | Apache Kafka |
+| Processing | PySpark Structured Streaming |
+| Storage | Parquet |
+| Database | PostgreSQL |
+| Data Generation | Faker |
+| Development | WSL2 Ubuntu |
+| Version Control | Git |
 
 ---
 
@@ -195,53 +192,98 @@ Spark subscribes to the Kafka topic and processes payment events in real time.
 ## Current Working Data Flow
 
 ```text
-Terminal 1 (Windows CMD)
-Kafka Broker
-        ↓
-
-Terminal 2 (Windows Git Bash)
 Payment Generator
-        ↓
+↓
 
-Kafka Topic: payments
-        ↓
+Kafka Producer
 
-Terminal 3 (WSL Ubuntu)
-Spark Structured Streaming
-        ↓
+↓
 
-Console Output
+Kafka Topic
+
+↓
+
+Spark Streaming
+
+↓
+
+Bronze
+
+↓
+
+Silver
+
+↓
+
+PostgreSQL
+
+↓
+
+Analytics
 ```
 
 ---
 
 ## Current Status
 
-### Completed
+## Completed
 
-* Kafka Broker Setup
-* Kafka Producer
-* Kafka Topic Creation
-* Real-Time Payment Event Generation
-* Spark Structured Streaming Setup
-* Kafka-Spark Integration
-* End-to-End Streaming Pipeline
-* WSL-Based Spark Environment
+- [x] Kafka Producer
+- [x] Kafka Topic
+- [x] Spark Streaming
+- [x] Bronze Layer
+- [x] Silver Layer
+- [x] PostgreSQL Integration
 
-### In Progress
+## In Progress
 
-* Bronze Layer (Parquet Storage)
+- [ ] Gold Layer
+- [ ] Data Quality Engine
 
-### Planned
+## Planned
 
-* Silver Layer Transformations
-* Delta Lake Integration
-* Airflow Orchestration
-* Dockerized Deployment
-* AWS S3 Data Lake
-* AWS Glue Catalog
-* Athena Analytics
+- [ ] MCP Server
+- [ ] AI Operations Copilot
+- [ ] Airflow
+- [ ] Docker
 
+---
+# Future Architecture
+```text
+Payment Generator
+
+↓
+
+Kafka
+
+↓
+
+Spark
+
+↓
+
+Bronze
+
+↓
+
+Silver
+
+↓
+
+Gold
+
+↓
+
+PostgreSQL
+
+↓
+
+MCP Server
+
+↓
+
+AI Operations Copilot
+```
 ---
 
 ## Goal
